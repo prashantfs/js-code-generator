@@ -11,6 +11,8 @@
     "clean": "rm -rf ./lib/",
     "cm": "cz",
     "coverage": "codecov",
+    "html-entities-decoder": "^1.0.2",
+    "jssoup": "^0.0.15",
     "lint": "eslint ./src/ --fix",
     "prepare": "husky install",
     "semantic-release": "semantic-release",
@@ -46,7 +48,10 @@
     "url": "https://github.com/ryansonshine/typescript-npm-package-template/issues"
   },
   "homepage": "https://github.com/ryansonshine/typescript-npm-package-template#readme",
-  "dependencies": {},
+  "dependencies": {
+    "html-entities-decoder": "^1.0.2",
+    "jssoup": "^0.0.15"
+  },
   "devDependencies": {
     "@types/jest": "^26.0.24",
     "@types/node": "^12.20.11",
