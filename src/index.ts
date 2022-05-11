@@ -1,13 +1,22 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/restrict-plus-operands */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import JSSoup from 'jssoup';
 import decode from 'html-entities-decoder';
+import { RuleInterface } from './types/rules';
 
-export const generateJavascript = (rule: any) => {
+export const generateJavascript = (rule: RuleInterface) => {
   // Some HTML tags are having closing forward slash like <img /> <source />
   // But when it comes to browser (chrome, safari, etc) the slash is removed while bundle is processed in the browser itself
   // https://www.w3schools.com/tags/att_img_src.asp
   // Ticket Ref: https://fleetstudio.atlassian.net/browse/WAL-276
-  const context = replaceAllStringOccurrences(rule.context, '"/>', '">');
-  const editedContext = replaceAllStringOccurrences(
+  const context: string = replaceAllStringOccurrences(
+    rule.context,
+    '"/>',
+    '">'
+  );
+  const editedContext: string = replaceAllStringOccurrences(
     rule.editedContext,
     '"/>',
     '">'
@@ -29,7 +38,7 @@ export const generateJavascript = (rule: any) => {
 };
 
 function appendChildIntoHeadElement(element: string, editedContext: string) {
-  var title = editedContext.match(/<title[^>]*>([^<]+)<\/title>/)[1];
+  const title = /<title[^>]*>([^<]+)<\/title>/.exec(editedContext)[1];
   return (
     `\ntry {\nvar x = document.createElement(` +
     '`' +
@@ -47,7 +56,7 @@ function appendChildIntoHeadElement(element: string, editedContext: string) {
 }
 
 function addAttributeUsingSelector(selector: string, editedContext: string) {
-  let attsDetails = removeHTMLTagFromString(selector, editedContext);
+  const attsDetails = removeHTMLTagFromString(selector, editedContext);
   return (
     `\ntry {\nvar b = document.querySelector(` +
     '`' +
@@ -67,10 +76,14 @@ function addAttributeUsingSelector(selector: string, editedContext: string) {
 }
 
 function removeHTMLTagFromString(selector: string, string: string) {
-  let attribute = replaceAllStringOccurrences(string, '<' + selector, '');
+  let attribute: string = replaceAllStringOccurrences(
+    string,
+    '<' + selector,
+    ''
+  );
   attribute = replaceAllStringOccurrences(attribute, '>', '');
   const myArray = attribute.split('=');
-  let finalObject = {
+  const finalObject = {
     attr: replaceAllStringOccurrences(myArray[0].trim(), '"', ''),
     value: replaceAllStringOccurrences(myArray[1].trim(), '"', ''),
   };
@@ -81,11 +94,11 @@ function processTagsViaAttributesJs(
   initialValue: string,
   replacementValue: string
 ) {
-  var initialHtmlAttr = new JSSoup(initialValue)?.nextElement?.attrs;
-  var replacementHtmlAttr = new JSSoup(replacementValue)?.nextElement?.attrs;
+  const initialHtmlAttr = new JSSoup(initialValue)?.nextElement?.attrs;
+  const replacementHtmlAttr = new JSSoup(replacementValue)?.nextElement?.attrs;
   let string = `\ntry {\n`;
   if (initialHtmlAttr && Object.keys(initialHtmlAttr).length > 0) {
-    let missingProperties = getMissingAttributes(
+    const missingProperties = getMissingAttributes(
       initialHtmlAttr,
       replacementHtmlAttr
     );
@@ -104,9 +117,9 @@ function processTagsViaAttributesJs(
         '`' +
         `);\n`;
     } else {
-      let key = Object.keys(initialHtmlAttr)[0];
-      let value = decode(initialHtmlAttr[key]);
-      let querySelector = '[' + key + '="' + value + '"]';
+      const key = Object.keys(initialHtmlAttr)[0];
+      const value = decode(initialHtmlAttr[key]);
+      const querySelector = '[' + key + '="' + value + '"]';
       string +=
         `var element = document.querySelector(` +
         '`' +
@@ -139,8 +152,9 @@ function addMisssingAttributes(array: any) {
 }
 
 function getMissingAttributes(object1: any, object2: any) {
-  let finalObject = [];
+  let finalObject: any[];
   for (const key in object2) {
+    // eslint-disable-next-line no-prototype-builtins
     if (!object1.hasOwnProperty(key)) {
       finalObject.push({
         key: key,
